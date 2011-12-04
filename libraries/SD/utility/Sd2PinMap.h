@@ -117,12 +117,12 @@ static const pin_map_t digitalPinMap[] = {
   {&DDRK, &PINK, &PORTK, 7}   // K7 69
 };
 //------------------------------------------------------------------------------
-#elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__)
+#elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega1284P__)
 // Sanguino
 
 // Two Wire (aka I2C) ports
 uint8_t const SDA_PIN = 17;
-uint8_t const SCL_PIN = 18;
+uint8_t const SCL_PIN = 16;
 
 // SPI port
 uint8_t const SS_PIN = 4;

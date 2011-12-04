@@ -134,6 +134,11 @@
 #define LED_PORT PORTB
 #define LED_PIN  PINB
 #define LED      PINB7
+#elif defined __AVR_ATmega644P__ || defined __AVR_ATmega1284P__
+#define LED_DDR  DDRA
+#define LED_PORT PORTA
+#define LED_PIN  PINA
+#define LED      PINA0
 #else
 /* Onboard LED is connected to pin PB5 in Arduino NG, Diecimila, and Duomilanuove */ 
 /* other boards like e.g. Crumb8, Crumb168 are using PB2 */
@@ -158,6 +163,16 @@
 #define SIG2	0x97
 #define SIG3	0x03
 #define PAGE_SIZE	0x80U	//128 words
+
+#elif defined __AVR_ATmega1284P__
+#define SIG2	0x97
+#define SIG3	0x05
+#define PAGE_SIZE	0x80U   //128 words
+
+#elif defined(__AVR_ATmega644P__)
+#define SIG2	0x96
+#define SIG3	0x0A
+#define PAGE_SIZE	0x80U   //128 words
 
 #elif defined __AVR_ATmega1281__
 #define SIG2	0x97
@@ -369,7 +384,7 @@ int main(void)
 	UBRRHI = (F_CPU/(BAUD_RATE*16L)-1) >> 8;
 	UCSRA = 0x00;
 	UCSRB = _BV(TXEN)|_BV(RXEN);	
-#elif defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)
+#elif defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
 
 #ifdef DOUBLE_SPEED
 	UCSR0A = (1<<U2X0); //Double speed mode USART0
@@ -558,7 +573,7 @@ int main(void)
 			if (flags.eeprom) {		                //Write to EEPROM one byte at a time
 				address.word <<= 1;
 				for(w=0;w<length.word;w++) {
-#if defined(__AVR_ATmega168__)  || defined(__AVR_ATmega328P__)
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
 					while(EECR & (1<<EEPE));
 					EEAR = (uint16_t)(void *)address.word;
 					EEDR = buff[w];
@@ -573,14 +588,14 @@ int main(void)
 			else {					        //Write to FLASH one page at a time
 				if (address.byte[1]>127) address_high = 0x01;	//Only possible with m128, m256 will need 3rd address byte. FIXME
 				else address_high = 0x00;
-#if defined(__AVR_ATmega128__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega1281__)
+#if defined(__AVR_ATmega128__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega1281__) || defined(__AVR_ATmega1284P__)
 				RAMPZ = address_high;
 #endif
 				address.word = address.word << 1;	        //address * 2 -> byte location
 				/* if ((length.byte[0] & 0x01) == 0x01) length.word++;	//Even up an odd number of bytes */
 				if ((length.byte[0] & 0x01)) length.word++;	//Even up an odd number of bytes
 				cli();					//Disable interrupts, just to be sure
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega1281__)
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega1281__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
 				while(bit_is_set(EECR,EEPE));			//Wait for previous EEPROM writes to complete
 #else
 				while(bit_is_set(EECR,EEWE));			//Wait for previous EEPROM writes to complete
@@ -679,7 +694,7 @@ int main(void)
 					 "rjmp	write_page	\n\t"
 					 "block_done:		\n\t"
 					 "clr	__zero_reg__	\n\t"	//restore zero register
-#if defined __AVR_ATmega168__  || __AVR_ATmega328P__ || __AVR_ATmega128__ || __AVR_ATmega1280__ || __AVR_ATmega1281__ 
+#if defined __AVR_ATmega168__  || __AVR_ATmega328P__ || __AVR_ATmega128__ || __AVR_ATmega1280__ || __AVR_ATmega1281__ || __AVR_ATmega644P__ || __AVR_ATmega1284P__
 					 : "=m" (SPMCSR) : "M" (PAGE_SIZE) : "r0","r16","r17","r24","r25","r28","r29","r30","r31"
 #else
 					 : "=m" (SPMCR) : "M" (PAGE_SIZE) : "r0","r16","r17","r24","r25","r28","r29","r30","r31"
@@ -701,7 +716,7 @@ int main(void)
 	else if(ch=='t') {
 		length.byte[1] = getch();
 		length.byte[0] = getch();
-#if defined(__AVR_ATmega128__) || defined(__AVR_ATmega1280__)
+#if defined(__AVR_ATmega128__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega1284P__)
 		if (address.word>0x7FFF) flags.rampz = 1;		// No go with m256, FIXME
 		else flags.rampz = 0;
 #endif
@@ -712,7 +727,7 @@ int main(void)
 			putch(0x14);
 			for (w=0;w < length.word;w++) {		        // Can handle odd and even lengths okay
 				if (flags.eeprom) {	                        // Byte access EEPROM read
-#if defined(__AVR_ATmega168__)  || defined(__AVR_ATmega328P__)
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
 					while(EECR & (1<<EEPE));
 					EEAR = (uint16_t)(void *)address.word;
 					EECR |= (1<<EERE);
@@ -725,7 +740,7 @@ int main(void)
 				else {
 
 					if (!flags.rampz) putch(pgm_read_byte_near(address.word));
-#if defined(__AVR_ATmega128__) || defined(__AVR_ATmega1280__)
+#if defined(__AVR_ATmega128__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega1284P__)
 					else putch(pgm_read_byte_far(address.word + 0x10000));
 					// Hmmmm, yuck  FIXME when m256 arrvies
 #endif
@@ -780,8 +795,12 @@ int main(void)
 			welcome = "ATmegaBOOT / PROBOmega128 - (C) J.P.Kyle, E.Lins - 050815\n\r";
 #elif defined SAVVY128
 			welcome = "ATmegaBOOT / Savvy128 - (C) J.P.Kyle, E.Lins - 050815\n\r";
-#elif defined __AVR_ATmega1280__ 
+#elif defined __AVR_ATmega1280__
 			welcome = "ATmegaBOOT / Arduino Mega - (C) Arduino LLC - 090930\n\r";
+#elif defined __AVR_ATmega644P__
+			welcome = "ATmegaBOOT / Sanguino\n\r";
+#elif defined __AVR_ATmega1284P__
+			welcome = "ATmegaBOOT / Sanguino w/ ATmega1284P\n\r";
 #endif
 
 			/* turn on LED */
@@ -928,7 +947,7 @@ void putch(char ch)
 		while (!(UCSR1A & _BV(UDRE1)));
 		UDR1 = ch;
 	}
-#elif defined(__AVR_ATmega168__)  || defined(__AVR_ATmega328P__)
+#elif defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
 	while (!(UCSR0A & _BV(UDRE0)));
 	UDR0 = ch;
 #else
@@ -966,7 +985,7 @@ char getch(void)
 		return UDR1;
 	}
 	return 0;
-#elif defined(__AVR_ATmega168__)  || defined(__AVR_ATmega328P__)
+#elif defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
 	uint32_t count = 0;
 	while(!(UCSR0A & _BV(RXC0))){
 		/* 20060803 DojoCorp:: Addon coming from the previous Bootloader*/               
@@ -1003,7 +1022,7 @@ void getNch(uint8_t count)
 			while(!(UCSR1A & _BV(RXC1)));
 			UDR1;
 		}
-#elif defined(__AVR_ATmega168__)  || defined(__AVR_ATmega328P__)
+#elif defined(__AVR_ATmega168__)  || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
 		getch();
 #else
 		/* m8,16,32,169,8515,8535,163 */

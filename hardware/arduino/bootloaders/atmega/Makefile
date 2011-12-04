@@ -196,6 +196,52 @@ mega_isp: LFUSE = FF
 mega_isp: EFUSE = F5
 mega_isp: isp
 
+atmega644p_16: TARGET = atmega644p_16MHz
+atmega644p_16: MCU_TARGET = atmega644p
+atmega644p_16: AVR_FREQ = 16000000L
+atmega644p_16: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>4' '-DNUM_LED_FLASHES=3' '-DBAUD_RATE=57600'
+atmega644p_16: LDSECTION  = --section-start=.text=0xF800
+atmega644p_16: $(PROGRAM)_atmega644p_16MHz.hex
+
+atmega644p_16_isp: atmega644p_16
+atmega644p_16_isp: TARGET = atmega644p
+atmega644p_16_isp: MCU_TARGET = atmega644p
+atmega644p_16_isp: HFUSE = DA
+atmega644p_16_isp: LFUSE = FF
+atmega644p_16_isp: EFUSE = F5
+atmega644p_16_isp: isp
+
+atmega1284p_8: TARGET = atmega1284p_8MHz
+atmega1284p_8: MCU_TARGET = atmega1284p
+atmega1284p_8: AVR_FREQ = 8000000L
+atmega1284p_8: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>4' '-DNUM_LED_FLASHES=3' '-DBAUD_RATE=57600'
+atmega1284p_8: LDSECTION  = --section-start=.text=0x1F000
+atmega1284p_8: $(PROGRAM)_atmega1284p_8MHz.hex
+
+atmega1284p_8_isp: atmega1284p_8
+atmega1284p_8_isp: TARGET = atmega1284p
+atmega1284p_8_isp: MCU_TARGET = atmega1284p
+atmega1284p_8_isp: HFUSE = DA
+atmega1284p_8_isp: LFUSE = 62
+atmega1284p_8_isp: EFUSE = F5
+atmega1284p_8_isp: isp
+
+atmega1284p_20: TARGET = atmega1284p_20MHz
+atmega1284p_20: MCU_TARGET = atmega1284p
+atmega1284p_20: AVR_FREQ = 20000000L
+atmega1284p_20: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>4' '-DNUM_LED_FLASHES=3' '-DBAUD_RATE=57600'
+atmega1284p_20: LDSECTION  = --section-start=.text=0x1F000
+atmega1284p_20: $(PROGRAM)_atmega1284p_20MHz.hex
+
+atmega1284p_20_isp: atmega1284p_20
+atmega1284p_20_isp: TARGET = atmega1284p
+atmega1284p_20_isp: MCU_TARGET = atmega1284p
+atmega1284p_20_isp: HFUSE = DA
+atmega1284p_20_isp: LFUSE = F7
+atmega1284p_20_isp: EFUSE = F5
+atmega1284p_20_isp: isp
+
+
 isp: $(TARGET)
 	$(ISPFUSES)
 	$(ISPFLASH)
@@ -221,4 +267,3 @@ clean:
 
 %.bin: %.elf
 	$(OBJCOPY) -j .text -j .data -O binary $< $@
-	

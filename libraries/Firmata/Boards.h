@@ -246,7 +246,7 @@ writePort(port, value, bitmask):  Write an 8 bit port.
 
 
 // Sanguino
-#elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__)
+#elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega1284P__)
 #define TOTAL_ANALOG_PINS       8
 #define TOTAL_PINS              32 // 24 digital + 8 analog
 #define VERSION_BLINK_PIN       0

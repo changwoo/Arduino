@@ -476,7 +476,7 @@ PGM_P gInterruptNameTable[]	PROGMEM =
 	gAvrInt_TWI,			//	27
 	gAvrInt_SPM_READY,		//	28
 
-#if defined(__AVR_ATmega324P__ ) || defined(__AVR_ATmega644P__)
+#if defined(__AVR_ATmega324P__ ) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
 	gAvrInt_USART1_RX,		//	29
 	gAvrInt_USART1_UDRE,	//	30
 	gAvrInt_USART1_TX,		//	31
